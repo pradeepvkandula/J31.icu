@@ -1,132 +1,588 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>My Videos</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RHC Hemodynamics</title>
+<style>
+  :root {
+    --bg: #0e1116;
+    --panel: #161b22;
+    --panel-2: #1c232d;
+    --line: #2a323d;
+    --ink: #e6edf3;
+    --dim: #8b97a4;
+    --faint: #5c6772;
+    --accent: #4dd0c0;
+    --warn: #e8a93a;
+    --bad: #e5645e;
+    --mono: 'SF Mono', 'JetBrains Mono', 'Consolas', ui-monospace, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    line-height: 1.45;
+    padding: 2rem 1rem 4rem;
+  }
+  .wrap { max-width: 920px; margin: 0 auto; }
 
-    body {
-      background: #0d0d0d;
-      color: #f0f0f0;
-      font-family: 'Roboto', sans-serif;
-      min-height: 100vh;
-    }
+  header { border-bottom: 1px solid var(--line); padding-bottom: 1rem; margin-bottom: 1.75rem; }
+  header h1 {
+    font-size: 1.05rem; font-weight: 600; letter-spacing: 0.18em;
+    text-transform: uppercase; display: flex; align-items: baseline; gap: 0.6rem;
+  }
+  header h1 .tag { color: var(--accent); font-family: var(--mono); font-size: 0.75rem; letter-spacing: 0.05em; }
+  header p { color: var(--dim); font-size: 0.82rem; margin-top: 0.35rem; }
 
-    header {
-      padding: 3rem 1.5rem 2rem;
-      text-align: center;
-      border-bottom: 1px solid #222;
-    }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.75rem; }
+  @media (max-width: 720px) { .grid { grid-template-columns: 1fr; } }
 
-    header h1 {
-      font-size: clamp(2rem, 6vw, 3.5rem);
-      font-weight: 700;
-      letter-spacing: 0.04em;
-      color: #ffffff;
-    }
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+  .panel h2 {
+    font-size: 0.7rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--dim);
+    padding: 0.85rem 1rem; border-bottom: 1px solid var(--line); background: var(--panel-2);
+  }
+  .body { padding: 1rem; }
 
-    header p {
-      margin-top: 0.5rem;
-      font-size: 0.9rem;
-      font-weight: 300;
-      color: #666;
-      letter-spacing: 0.05em;
-    }
+  .seclabel {
+    font-size: 0.62rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent);
+    font-family: var(--mono); margin: 1rem 0 0.4rem; padding-bottom: 0.3rem;
+    border-bottom: 1px solid var(--line);
+  }
+  .seclabel:first-child { margin-top: 0; }
 
-    main {
-      max-width: 1100px;
-      margin: 0 auto;
-      padding: 3rem 1.5rem 5rem;
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-      gap: 2rem;
-    }
+  .field { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; padding: 0.45rem 0; }
+  .field label { font-size: 0.85rem; color: var(--ink); flex: 1; }
+  .field label .sub { display: block; color: var(--faint); font-size: 0.72rem; font-family: var(--mono); }
+  .field input {
+    width: 90px; background: var(--bg); border: 1px solid var(--line); color: var(--ink);
+    font-family: var(--mono); font-size: 0.92rem; padding: 0.4rem 0.55rem; border-radius: 5px;
+    text-align: right; -moz-appearance: textfield;
+  }
+  .field input::-webkit-outer-spin-button, .field input::-webkit-inner-spin-button { -webkit-appearance: none; }
+  .field input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 2px rgba(77,208,192,0.15); }
+  .field input.auto { color: var(--accent); border-color: rgba(77,208,192,0.35); }
+  .field .unit { color: var(--faint); font-family: var(--mono); font-size: 0.72rem; width: 52px; }
 
-    .video-card {
-      background: #161616;
-      border: 1px solid #222;
-    }
+  .toggle { display: flex; gap: 0.4rem; margin-bottom: 0.75rem; }
+  .toggle button {
+    flex: 1; background: var(--bg); border: 1px solid var(--line); color: var(--dim);
+    font-family: var(--mono); font-size: 0.72rem; padding: 0.4rem; border-radius: 5px; cursor: pointer;
+    letter-spacing: 0.04em;
+  }
+  .toggle button.on { background: var(--panel-2); border-color: var(--accent); color: var(--accent); }
 
-    .video-card__embed {
-      position: relative;
-      width: 100%;
-      padding-bottom: 56.25%;
-      background: #000;
-    }
+  .out { display: block; }
 
-    .video-card__embed iframe {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      border: none;
-      display: block;
-    }
+  /* Two-column results table: name | Fick | Thermo */
+  .trow {
+    display: grid; grid-template-columns: 1fr 4.6rem 4.6rem; align-items: baseline;
+    gap: 0.5rem; padding: 0.4rem 1rem; border-bottom: 1px solid var(--line);
+  }
+  .trow:last-child { border-bottom: none; }
+  .tname { font-size: 0.8rem; color: var(--dim); line-height: 1.25; }
+  .tname b { color: var(--ink); font-weight: 600; font-family: var(--mono); font-size: 0.74rem; margin-left: 0.15rem; }
+  .tcol {
+    font-family: var(--mono); font-size: 0.92rem; font-weight: 600; text-align: right;
+    color: var(--ink); display: flex; flex-direction: column; align-items: flex-end; line-height: 1.2;
+  }
+  .tcol i { font-style: normal; font-size: 0.6rem; color: var(--faint); font-weight: 400; }
+  .tcol.use { color: var(--accent); }
 
-    .video-card__title {
-      padding: 0.75rem 1rem;
-      font-size: 0.85rem;
-      font-weight: 400;
-      color: #aaa;
-      border-top: 1px solid #222;
-      letter-spacing: 0.02em;
-    }
-  </style>
+  .trow.thead .tcol {
+    font-size: 0.62rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--dim); font-weight: 600;
+  }
+  .trow.thead { padding-bottom: 0.3rem; background: var(--panel-2); }
+  .trow.thead .tcol.use { color: var(--accent); }
+
+  .trow.co .tcol { font-size: 1.05rem; }
+
+  .trow.res .tcol { gap: 0; }
+  .trow.res .tcol .d { font-size: 0.92rem; }
+  .trow.res .tcol .w { font-size: 0.64rem; color: var(--faint); font-weight: 400; }
+  .trow.res .tcol.use .w { color: var(--accent); opacity: 0.7; }
+
+  .trow.solo { grid-template-columns: 1fr auto; }
+  .tsolo {
+    font-family: var(--mono); font-size: 0.92rem; font-weight: 600; text-align: right; color: var(--ink);
+    display: flex; flex-direction: column; align-items: flex-end; line-height: 1.2;
+  }
+  .tsolo i { font-style: normal; font-size: 0.6rem; color: var(--faint); font-weight: 400; }
+
+  .tsep { height: 1px; background: var(--line); margin: 0; }
+
+  .flag { font-size: 0.58rem; font-family: var(--mono); padding: 0.05rem 0.28rem; border-radius: 3px; margin-left: 0.35rem; vertical-align: middle; }
+  .flag.hi { background: rgba(229,100,94,0.15); color: var(--bad); }
+  .flag.lo { background: rgba(232,169,58,0.15); color: var(--warn); }
+
+  .note { color: var(--faint); font-size: 0.72rem; margin-top: 1.5rem; line-height: 1.6; }
+
+  .interp { margin-top: 1.75rem; }
+  .interp h2 { display: flex; align-items: center; justify-content: space-between; }
+  .interp .body { font-size: 0.92rem; line-height: 1.6; color: var(--ink); }
+  .interp .body .placeholder { color: var(--faint); }
+  .interp .body strong { color: var(--accent); font-weight: 600; }
+  .copybtn {
+    background: var(--bg); border: 1px solid var(--line); color: var(--dim);
+    font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.06em; text-transform: uppercase;
+    padding: 0.3rem 0.7rem; border-radius: 5px; cursor: pointer; transition: all 0.15s;
+  }
+  .copybtn:hover { border-color: var(--accent); color: var(--accent); }
+  .copybtn.done { border-color: var(--accent); color: var(--accent); background: rgba(77,208,192,0.1); }
+
+  .mapcalc { margin-top: 1.75rem; }
+  .mcrow { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; }
+  .mcrow input {
+    width: 110px; background: var(--bg); border: 1px solid var(--line); color: var(--ink);
+    font-family: var(--mono); font-size: 0.95rem; padding: 0.45rem 0.6rem; border-radius: 5px;
+    text-align: right; -moz-appearance: textfield;
+  }
+  .mcrow input::-webkit-outer-spin-button, .mcrow input::-webkit-inner-spin-button { -webkit-appearance: none; }
+  .mcrow input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 2px rgba(77,208,192,0.15); }
+  .mcslash, .mceq { color: var(--faint); font-family: var(--mono); font-size: 1.1rem; }
+  .mcout { font-family: var(--mono); font-size: 1.5rem; font-weight: 600; color: var(--accent); min-width: 48px; text-align: right; }
+  .mcunit { color: var(--dim); font-family: var(--mono); font-size: 0.72rem; }
+  .mcformula { color: var(--faint); font-family: var(--mono); font-size: 0.72rem; margin-top: 0.7rem; }
+  .note code { font-family: var(--mono); color: var(--dim); }
+  footer { margin-top: 2rem; padding-top: 1rem; border-top: 1px solid var(--line); color: var(--faint); font-size: 0.72rem; }
+</style>
 </head>
 <body>
+<div class="wrap">
+  <header>
+    <h1>Right Heart Cath <span class="tag">// hemodynamics</span></h1>
+    <p>Enter measured values. Derived parameters update live. Not a substitute for clinical judgment.</p>
+  </header>
 
-<header>
-  <h1>Right Circumflex</h1>
-  <p>Did you hear about that Randomized Controlled Trial of scheduled furosemide in Atrial Fibrillation?</p>
-</header>
+  <div class="grid">
+    <!-- INPUTS -->
+    <div class="panel">
+      <h2>Inputs</h2>
+      <div class="body">
 
-<main>
+        <div class="seclabel">Demographics</div>
 
-  <!-- ── Add your videos below ── -->
-  <!-- Copy a .video-card block for each video -->
-  <!-- Replace VIDEO_ID with the ID from your YouTube URL (the part after ?v=) -->
+        <div class="field">
+          <label>Age ≥ 70 years <span class="sub">sets VO₂ est. to 110·BSA</span></label>
+          <div class="toggle" id="ageToggle" style="margin:0;width:120px;flex:none">
+            <button data-a="no" class="on">&lt; 70</button>
+            <button data-a="yes">≥ 70</button>
+          </div>
+          <span class="unit"></span>
+        </div>
+        <div class="field" id="f-vo2">
+          <label>VO₂ <span class="sub" id="vo2sub">auto: 125·BSA</span></label>
+          <input type="number" id="vo2" step="1" placeholder="auto">
+          <span class="unit">mL/min</span>
+        </div>
+        <div class="field"><label>Height</label><input type="number" id="ht" step="0.1" placeholder="—"><span class="unit" id="htU">cm</span></div>
+        <div class="field"><label>Weight</label><input type="number" id="wt" step="0.1" placeholder="—"><span class="unit" id="wtU">kg</span></div>
+        <div class="field"><label>BSA <span class="sub">auto from ht/wt, or enter directly</span></label><input type="number" id="bsa" step="0.01" placeholder="auto"><span class="unit">m²</span></div>
 
-  <div class="video-card">
-    <div class="video-card__embed">
-      <iframe
-        src="https://www.youtube-nocookie.com/embed/3pHXDr5PTeg"
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-        allowfullscreen
-        loading="lazy"
-      ></iframe>
+        <div class="seclabel">Oxygen &amp; output</div>
+
+        <div class="field"><label>Heart rate</label><input type="number" id="hr" step="1" placeholder="—"><span class="unit">bpm</span></div>
+        <div class="field" id="f-hb"><label>Hemoglobin</label><input type="number" id="hb" step="0.1" placeholder="—"><span class="unit">g/dL</span></div>
+        <div class="field" id="f-sao2"><label>Arterial O₂ sat <span class="sub">SaO₂</span></label><input type="number" id="sao2" step="1" placeholder="—"><span class="unit">%</span></div>
+        <div class="field" id="f-svo2"><label>Mixed venous O₂ sat <span class="sub">SvO₂ (PA)</span></label><input type="number" id="svo2" step="1" placeholder="—"><span class="unit">%</span></div>
+        <div class="field" id="f-co"><label>Thermodilution CO <span class="sub">if measured directly</span></label><input type="number" id="co_td" step="0.1" placeholder="—"><span class="unit">L/min</span></div>
+
+        <div class="seclabel">Pressures</div>
+
+        <div class="field"><label>RA <span class="sub">a / v waves &amp; mean (CVP)</span></label>
+          <span style="display:flex;gap:4px">
+            <input type="number" id="ra_a" step="1" placeholder="a" style="width:40px">
+            <input type="number" id="ra_v" step="1" placeholder="v" style="width:40px">
+            <input type="number" id="rap" step="1" placeholder="mean" style="width:52px">
+          </span><span class="unit">mmHg</span>
+        </div>
+
+        <div class="field"><label>RV <span class="sub">systolic / EDP</span></label>
+          <span style="display:flex;gap:4px">
+            <input type="number" id="rvs" step="1" placeholder="sys" style="width:54px">
+            <input type="number" id="rvd" step="1" placeholder="EDP" style="width:54px">
+          </span><span class="unit">mmHg</span>
+        </div>
+
+        <div class="field"><label>PA <span class="sub">systolic / diastolic / mean</span></label>
+          <span style="display:flex;gap:4px">
+            <input type="number" id="pas" step="1" placeholder="sys" style="width:40px">
+            <input type="number" id="pad" step="1" placeholder="dia" style="width:40px">
+            <input type="number" id="mpap" step="1" placeholder="mean" style="width:52px">
+          </span><span class="unit">mmHg</span>
+        </div>
+
+        <div class="field"><label>PCWP <span class="sub">wedge</span></label><input type="number" id="pcwp" step="1" placeholder="—"><span class="unit">mmHg</span></div>
+
+        <div class="field"><label>LA <span class="sub">a / v waves &amp; mean</span></label>
+          <span style="display:flex;gap:4px">
+            <input type="number" id="la_a" step="1" placeholder="a" style="width:40px">
+            <input type="number" id="la_v" step="1" placeholder="v" style="width:40px">
+            <input type="number" id="la_m" step="1" placeholder="mean" style="width:52px">
+          </span><span class="unit">mmHg</span>
+        </div>
+
+        <div class="field"><label>LV <span class="sub">systolic / EDP</span></label>
+          <span style="display:flex;gap:4px">
+            <input type="number" id="lvs" step="1" placeholder="sys" style="width:54px">
+            <input type="number" id="lvedp" step="1" placeholder="EDP" style="width:54px">
+          </span><span class="unit">mmHg</span>
+        </div>
+
+        <div class="field"><label>Ascending aorta <span class="sub">systolic / diastolic / mean</span></label>
+          <span style="display:flex;gap:4px">
+            <input type="number" id="aos" step="1" placeholder="sys" style="width:40px">
+            <input type="number" id="aod" step="1" placeholder="dia" style="width:40px">
+            <input type="number" id="aom" step="1" placeholder="mean" style="width:52px">
+          </span><span class="unit">mmHg</span>
+        </div>
+
+        <div class="field"><label>Systemic (cuff) <span class="sub">systolic / diastolic / MAP</span></label>
+          <span style="display:flex;gap:4px">
+            <input type="number" id="sbp" step="1" placeholder="sys" style="width:40px">
+            <input type="number" id="dbp" step="1" placeholder="dia" style="width:40px">
+            <input type="number" id="map" step="1" placeholder="MAP" style="width:52px">
+          </span><span class="unit">mmHg</span>
+        </div>
+      </div>
     </div>
-    <div class="video-card__title">Friday 4:55 PM in the ED</div>
+
+    <!-- OUTPUTS -->
+    <div class="panel">
+      <h2>Derived</h2>
+      <div class="out" id="results"></div>
+    </div>
   </div>
 
-  <div class="video-card">
-    <div class="video-card__embed">
-      <iframe
-        src="https://www.youtube-nocookie.com/embed/_g3mkImmPkg"
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-        allowfullscreen
-        loading="lazy"
-      ></iframe>
-    </div>
-    <div class="video-card__title">The J31 Experience</div>
+  <div class="panel interp">
+    <h2>Interpretation
+      <button id="copyBtn" class="copybtn">Copy</button>
+    </h2>
+    <div class="body" id="interp">—</div>
   </div>
 
-  <div class="video-card">
-    <div class="video-card__embed">
-      <iframe
-        src="https://www.youtube-nocookie.com/embed/Q_TjIaxb0J8"
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-        allowfullscreen
-        loading="lazy"
-      ></iframe>
+  <div class="panel mapcalc">
+    <h2>MAP calculator <span style="color:var(--faint);font-family:var(--mono);text-transform:none;letter-spacing:0;font-size:0.66rem">— standalone, feeds nothing</span></h2>
+    <div class="body">
+      <div class="mcrow">
+        <input type="number" id="mc_sys" step="1" placeholder="systolic">
+        <span class="mcslash">/</span>
+        <input type="number" id="mc_dia" step="1" placeholder="diastolic">
+        <span class="mceq">=</span>
+        <span class="mcout" id="mc_out">—</span>
+        <span class="mcunit">mmHg MAP</span>
+      </div>
+      <div class="mcformula">MAP = (systolic + 2 × diastolic) / 3</div>
     </div>
-    <div class="video-card__title">The Night Before Admits</div>
   </div>
 
-</main>
+  <div class="note">
+    <strong style="color:var(--dim)">Formulas.</strong><br>
+    BSA (DuBois) = <code>0.007184 · ht<sup>0.725</sup> · wt<sup>0.425</sup></code>.
+    Fick CO = <code>VO₂ / (1.34 · Hb · 10 · (SaO₂−SvO₂))</code>.
+    CI = CO / BSA · SV = CO·1000/HR.
+    SVR = <code>80·(MAP−RAP)/CO</code> dynes, or <code>(MAP−RAP)/CO</code> Wood units. Indexed forms (SVRI, PVRI, TPRI) use CI in place of CO.
+    PVR = <code>80·TPG/CO</code> dynes = TPG/CO WU.
+    TPG = mPAP−PCWP · DPG = PAd−PCWP.
+    TPR (total pulmonary) = <code>80·mPAP/CO</code> dynes = mPAP/CO WU. Wood units = dynes ÷ 80.
+    Cardiac power output = MAP·CO/451.
+    PA compliance = SV/(PAs−PAd).
+  </div>
 
+  <footer>Static client-side tool · no data leaves your browser · host on GitHub Pages as <code>index.html</code></footer>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+let ageOver70 = false;
+
+$('ageToggle').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  ageOver70 = b.dataset.a === 'yes';
+  [...$('ageToggle').children].forEach(x => x.classList.toggle('on', x === b));
+  $('vo2sub').textContent = ageOver70 ? 'auto: 110·BSA' : 'auto: 125·BSA';
+  calc();
+});
+
+const num = id => { const v = parseFloat($(id).value); return isFinite(v) ? v : null; };
+
+// reference ranges: [low, high] for flagging. Resistance flags evaluate the dyne value.
+const ranges = {
+  CO:[4,8], CI:[2.5,4], SV:[60,100], SVI:[33,47],
+  SVR:[800,1200], SVRI:[1970,2390], PVR:[20,130],
+  TPR:[null,null], TPG:[null,12], DPG:[null,7], mPAP:[null,20],
+  RVPA:[null,10], LVAO:[null,10], CPO:[0.6,null], PAc:[null,null]
+};
+
+function flag(key, v) {
+  const r = ranges[key]; if (!r || v == null) return '';
+  if (r[1] != null && v > r[1]) return '<span class="flag hi">HIGH</span>';
+  if (r[0] != null && v < r[0]) return '<span class="flag lo">LOW</span>';
+  return '';
+}
+
+function bsa(ht, wt) {
+  if (!ht || !wt) return null;
+  return 0.007184 * Math.pow(ht, 0.725) * Math.pow(wt, 0.425);
+}
+
+function calc() {
+  const hb = num('hb'), sao2 = num('sao2'), svo2 = num('svo2');
+  const hr = num('hr');
+  const sbp = num('sbp'), dbp = num('dbp'), map = num('map');
+  const ra_a = num('ra_a'), ra_v = num('ra_v'), rap = num('rap');
+  const rvs = num('rvs'), rvd = num('rvd');
+  const pas = num('pas'), pad = num('pad'), mpap = num('mpap');
+  const pcwp = num('pcwp');
+  const la_a = num('la_a'), la_v = num('la_v'), la_m = num('la_m');
+  const lvs = num('lvs'), lvedp = num('lvedp');
+  const aos = num('aos'), aod = num('aod'), aom = num('aom');
+  const ht = num('ht'), wt = num('wt');
+
+  // BSA: direct input wins; otherwise compute from ht/wt and show it.
+  // An auto-filled value (.auto class) is treated as computed, not a manual entry.
+  const bsaIsAuto = $('bsa').classList.contains('auto');
+  let BSA = bsaIsAuto ? null : num('bsa');
+  const bsaCalc = bsa(ht, wt);
+  if (BSA == null) {
+    BSA = bsaCalc;
+    if (bsaCalc != null) { $('bsa').value = bsaCalc.toFixed(2); $('bsa').classList.add('auto'); }
+    else { $('bsa').value = ''; $('bsa').classList.remove('auto'); }
+  } else {
+    $('bsa').classList.remove('auto');
+  }
+
+  // VO2: use entered, else estimate (110 if >=70, else 125) * BSA
+  let vo2 = num('vo2');
+  if (vo2 == null && BSA) vo2 = (ageOver70 ? 110 : 125) * BSA;
+
+  // Both cardiac outputs
+  const CO_td = num('co_td');
+  let CO_fick = null;
+  if (vo2 && hb && sao2 != null && svo2 != null && (sao2 - svo2) > 0) {
+    CO_fick = vo2 / (1.34 * hb * 10 * ((sao2 - svo2) / 100));
+  }
+  const usedFick = CO_td == null && CO_fick != null;
+  const usedTd = CO_td != null;
+  const fmt = (v, d=0) => v == null ? '—' : v.toFixed(d);
+
+  // Compute every flow-derived metric from a given CO. Returns an object of values.
+  const derive = (co) => {
+    const CI  = (co && BSA) ? co / BSA : null;
+    const SV  = (co && hr) ? co * 1000 / hr : null;
+    const SVI = (SV && BSA) ? SV / BSA : null;
+    const dPs = (map != null && rap != null) ? (map - rap) : null;
+    const SVRwu = (co && dPs != null) ? dPs / co : null;
+    const SVRIwu = (CI && dPs != null) ? dPs / CI : null;
+    const PVRwu = (co && TPG != null) ? TPG / co : null;
+    const PVRIwu = (CI && TPG != null) ? TPG / CI : null;
+    const TPRwu = (co && mpap != null) ? mpap / co : null;
+    const TPRIwu = (CI && mpap != null) ? mpap / CI : null;
+    return { CI, SV, SVI,
+      SVR: x80(SVRwu), SVRwu, SVRI: x80(SVRIwu), SVRIwu,
+      TPR: x80(TPRwu), TPRwu, TPRI: x80(TPRIwu), TPRIwu,
+      PVR: x80(PVRwu), PVRwu, PVRI: x80(PVRIwu), PVRIwu };
+  };
+
+  const TPG = (mpap != null && pcwp != null) ? mpap - pcwp : null;
+  const DPG = (pad != null && pcwp != null) ? pad - pcwp : null;
+
+  const F = derive(CO_fick);
+  const T = derive(CO_td);
+
+  // Primary set (for interpretation): TD if measured, else Fick
+  const P = usedTd ? T : F;
+  const primaryCO = usedTd ? CO_td : CO_fick;
+
+  const CPO = (primaryCO && map != null) ? map * primaryCO / 451 : null;
+  const PAc = (P.SV && pas != null && pad != null && (pas - pad) > 0) ? P.SV / (pas - pad) : null;
+
+  // ---- Render two-column table ----
+  const head = `<div class="trow thead">
+    <span class="tname"></span>
+    <span class="tcol ${usedFick?'use':''}">Fick</span>
+    <span class="tcol ${usedTd?'use':''}">Thermo</span>
+  </div>`;
+
+  const coRow = `<div class="trow co">
+    <span class="tname">Cardiac output <b>CO</b></span>
+    <span class="tcol ${usedFick?'use':''}">${fmt(CO_fick,2)}<i>L/min</i></span>
+    <span class="tcol ${usedTd?'use':''}">${fmt(CO_td,2)}<i>L/min</i></span>
+  </div>`;
+
+  // single-unit two-column row
+  const r1 = (name, abbr, key, u, d, fk) => {
+    const fv = F[key], tv = T[key];
+    return `<div class="trow">
+      <span class="tname">${name} <b>${abbr}</b>${fk?flag(fk, usedTd?tv:fv):''}</span>
+      <span class="tcol ${usedFick?'use':''}">${fmt(fv,d)}<i>${u}</i></span>
+      <span class="tcol ${usedTd?'use':''}">${fmt(tv,d)}<i>${u}</i></span>
+    </div>`;
+  };
+
+  // resistance row: dynes on top line, WU on second, two columns
+  const rR = (name, abbr, dynKey, wuKey, fk) => {
+    const fd = F[dynKey], td = T[dynKey], fw = F[wuKey], tw = T[wuKey];
+    return `<div class="trow res">
+      <span class="tname">${name} <b>${abbr}</b>${fk?flag(fk, usedTd?td:fd):''}</span>
+      <span class="tcol ${usedFick?'use':''}"><span class="d">${fmt(fd,0)}</span><span class="w">${fmt(fw,2)} WU</span></span>
+      <span class="tcol ${usedTd?'use':''}"><span class="d">${fmt(td,0)}</span><span class="w">${fmt(tw,2)} WU</span></span>
+    </div>`;
+  };
+
+  // full-width single-value rows (flow-independent params)
+  const r0 = (name, abbr, val, u, fk) => `<div class="trow solo">
+    <span class="tname">${name} <b>${abbr}</b>${fk?flag(fk,val):''}</span>
+    <span class="tsolo">${val==null?'—':val}<i>${u}</i></span>
+  </div>`;
+
+  const sep = '<div class="tsep"></div>';
+
+  $('results').innerHTML =
+    head + coRow + sep +
+    r1('Cardiac index','CI','CI','L/min/m²',2,'CI') +
+    r1('Stroke volume','SV','SV','mL',0,'SV') +
+    r1('Stroke volume index','SVI','SVI','mL/m²',0,'SVI') +
+    sep +
+    rR('Systemic vasc. resistance','SVR','SVR','SVRwu','SVR') +
+    rR('SVR index','SVRI','SVRI','SVRIwu','SVRI') +
+    rR('Total pulmonary resistance','TPR','TPR','TPRwu','TPR') +
+    rR('TPR index','TPRI','TPRI','TPRIwu','TPR') +
+    rR('Pulmonary vasc. resistance','PVR','PVR','PVRwu','PVR') +
+    rR('PVR index','PVRI','PVRI','PVRIwu','PVR') +
+    sep +
+    r0('Transpulmonary gradient','TPG', fmt(TPG,0)!=='—'?fmt(TPG,0):null, 'mmHg','TPG') +
+    r0('Diastolic pressure gradient','DPG', fmt(DPG,0)!=='—'?fmt(DPG,0):null, 'mmHg','DPG') +
+    r0('Mean PA pressure','mPAP', mpap!=null?mpap.toFixed(0):null, 'mmHg','mPAP') +
+    r0('RV–PA peak gradient','RV→PA', (rvs!=null&&pas!=null)?(rvs-pas).toFixed(0):null, 'mmHg','RVPA') +
+    r0('LV–aorta peak gradient','LV→Ao', (lvs!=null&&aos!=null)?(lvs-aos).toFixed(0):null, 'mmHg','LVAO') +
+    r0('Cardiac power output','CPO', CPO!=null?CPO.toFixed(2):null, 'W','CPO') +
+    r0('PA compliance','PAc', PAc!=null?PAc.toFixed(2):null, 'mL/mmHg') +
+    r0('VO₂ used','VO₂', vo2!=null?vo2.toFixed(0):null, 'mL/min');
+
+  buildInterpretation({ rap, pcwp, mpap, PVRwu: P.PVRwu, CI: P.CI, CO: primaryCO, usedFick, usedTd });
+}
+
+const x80 = v => v != null ? v * 80 : null;
+
+// Thresholds (2022 ESC/ERS hemodynamic definitions for PH; standard filling-pressure cutoffs)
+function buildInterpretation(v) {
+  const { rap, pcwp, mpap, PVRwu, CI, CO, usedFick, usedTd } = v;
+  const RAP_HI = 7;      // normal mean RA ~2–6; >7 elevated
+  const PCWP_HI = 15;    // normal ≤12; >15 elevated (per PH definition)
+  const MPAP_HI = 20;    // PH if mPAP >20
+  const PVR_HI = 2;      // WU; >2 abnormal per 2022 def
+  const CI_LOW = 2.2;    // <2.2 = low-output state
+
+  // Need at least the pressures to say anything useful
+  if (rap == null && pcwp == null && mpap == null) {
+    $('interp').innerHTML = '<span class="placeholder">Enter RA pressure, PCWP, and PA pressures to generate an interpretation.</span>';
+    $('interp').dataset.plain = '';
+    return;
+  }
+
+  const parts = [];
+
+  // 1. Filling pressures (right = RAP, left = PCWP)
+  const rightHi = rap != null && rap > RAP_HI;
+  const leftHi  = pcwp != null && pcwp > PCWP_HI;
+  let fillingTxt;
+  if (rap == null && pcwp == null) {
+    fillingTxt = 'Filling pressures not assessed';
+  } else if (rightHi && leftHi) {
+    fillingTxt = 'Elevated biventricular filling pressures';
+  } else if (leftHi && !rightHi) {
+    fillingTxt = 'Elevated left-sided filling pressure' + (rap == null ? '' : ' with normal right-sided filling pressure');
+  } else if (rightHi && !leftHi) {
+    fillingTxt = 'Elevated right-sided filling pressure' + (pcwp == null ? '' : ' with normal left-sided filling pressure');
+  } else {
+    fillingTxt = 'Normal filling pressures';
+  }
+  parts.push(fillingTxt);
+
+  // 2. PA pressures and PH classification
+  let phTxt;
+  if (mpap == null) {
+    phTxt = 'pulmonary artery pressure not assessed';
+  } else if (mpap <= MPAP_HI) {
+    phTxt = 'normal pulmonary artery pressures';
+  } else {
+    // PH present — classify if PCWP and PVR available
+    const pvrHi = PVRwu != null && PVRwu > PVR_HI;
+    if (pcwp == null || PVRwu == null) {
+      phTxt = 'pulmonary hypertension (incomplete data to subclassify — needs PCWP and PVR)';
+    } else if (pcwp <= PCWP_HI && pvrHi) {
+      phTxt = 'pre-capillary pulmonary hypertension';
+    } else if (pcwp > PCWP_HI && !pvrHi) {
+      phTxt = 'isolated post-capillary pulmonary hypertension (IpcPH)';
+    } else if (pcwp > PCWP_HI && pvrHi) {
+      phTxt = 'combined pre- and post-capillary pulmonary hypertension (CpcPH)';
+    } else {
+      phTxt = 'pulmonary hypertension, unclassified (mPAP >20 with PCWP ≤15 and PVR ≤2 WU)';
+    }
+  }
+  parts.push('with ' + phTxt);
+
+  // 3. Cardiac index / output
+  let ciTxt;
+  if (CI == null && CO == null) {
+    ciTxt = 'cardiac output not assessed';
+  } else if (CI != null) {
+    const method = usedTd ? 'thermodilution' : (usedFick ? 'Fick' : 'calculated');
+    ciTxt = (CI < CI_LOW ? 'reduced' : 'preserved') + ' cardiac index by ' + method +
+            ' (CI ' + CI.toFixed(2) + ' L/min/m²)';
+  } else {
+    const method = usedTd ? 'thermodilution' : (usedFick ? 'Fick' : 'calculated');
+    ciTxt = 'cardiac output ' + CO.toFixed(2) + ' L/min by ' + method;
+  }
+  parts.push('and ' + ciTxt);
+
+  const plain = capitalize(parts.join(' ')) + '.';
+  const html = '<strong>' + escapeHtml(fillingTxt) + '</strong> ' +
+               escapeHtml(parts.slice(1).join(' ')) + '.';
+
+  $('interp').innerHTML = html;
+  $('interp').dataset.plain = plain;
+}
+
+function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+function escapeHtml(s) { return s.replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); }
+
+$('copyBtn').addEventListener('click', () => {
+  const txt = $('interp').dataset.plain || '';
+  if (!txt) return;
+  navigator.clipboard.writeText(txt).then(() => {
+    const b = $('copyBtn');
+    b.textContent = 'Copied'; b.classList.add('done');
+    setTimeout(() => { b.textContent = 'Copy'; b.classList.remove('done'); }, 1500);
+  }).catch(() => {
+    // Fallback for non-secure contexts
+    const ta = document.createElement('textarea');
+    ta.value = txt; document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); } catch(e) {}
+    document.body.removeChild(ta);
+    const b = $('copyBtn'); b.textContent = 'Copied'; b.classList.add('done');
+    setTimeout(() => { b.textContent = 'Copy'; b.classList.remove('done'); }, 1500);
+  });
+});
+
+// Standalone MAP calculator — independent, feeds no formulas.
+function mapCalc() {
+  const s = parseFloat($('mc_sys').value), d = parseFloat($('mc_dia').value);
+  if (isFinite(s) && isFinite(d)) {
+    $('mc_out').textContent = ((s + 2*d) / 3).toFixed(0);
+  } else {
+    $('mc_out').textContent = '—';
+  }
+}
+$('mc_sys').addEventListener('input', mapCalc);
+$('mc_dia').addEventListener('input', mapCalc);
+
+document.querySelectorAll('input').forEach(i => i.addEventListener('input', calc));
+calc();
+</script>
 </body>
 </html>
