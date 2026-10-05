@@ -6,16 +6,17 @@
 <title>RHC Hemodynamics</title>
 <style>
   :root {
-    --bg: #0e1116;
-    --panel: #161b22;
-    --panel-2: #1c232d;
-    --line: #2a323d;
-    --ink: #e6edf3;
-    --dim: #8b97a4;
-    --faint: #5c6772;
-    --accent: #4dd0c0;
-    --warn: #e8a93a;
-    --bad: #e5645e;
+    --bg: #f4eeee;
+    --panel: #ffffff;
+    --panel-2: #f7f0f0;
+    --line: #e0d2d2;
+    --ink: #2a1d1d;
+    --dim: #7a6a6a;
+    --faint: #a89898;
+    --accent: #a3261b;        /* sanguine */
+    --accent-soft: #f6e4e2;
+    --warn: #8a5a00;
+    --bad: #a3261b;
     --mono: 'SF Mono', 'JetBrains Mono', 'Consolas', ui-monospace, monospace;
     --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   }
@@ -30,6 +31,15 @@
   .wrap { max-width: 920px; margin: 0 auto; }
 
   header { border-bottom: 1px solid var(--line); padding-bottom: 1rem; margin-bottom: 1.75rem; }
+  .tabs { display: flex; gap: 4px; margin-bottom: 1.5rem; }
+  .tabbtn {
+    background: var(--panel); border: 1px solid var(--line); color: var(--dim);
+    font-family: var(--sans); font-size: 0.8rem; font-weight: 600; padding: 0.55rem 1.1rem;
+    border-radius: 7px 7px 0 0; cursor: pointer; letter-spacing: 0.02em; border-bottom: none;
+  }
+  .tabbtn.on { background: var(--panel-2); color: var(--accent); border-color: var(--accent); }
+  .tabbtn:not(.on):hover { color: var(--ink); }
+
   header h1 {
     font-size: 1.05rem; font-weight: 600; letter-spacing: 0.18em;
     text-transform: uppercase; display: flex; align-items: baseline; gap: 0.6rem;
@@ -63,8 +73,8 @@
     text-align: right; -moz-appearance: textfield;
   }
   .field input::-webkit-outer-spin-button, .field input::-webkit-inner-spin-button { -webkit-appearance: none; }
-  .field input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 2px rgba(77,208,192,0.15); }
-  .field input.auto { color: var(--accent); border-color: rgba(77,208,192,0.35); }
+  .field input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 2px rgba(163,38,27,0.14); }
+  .field input.auto { color: var(--accent); border-color: rgba(163,38,27,0.4); }
   .field .unit { color: var(--faint); font-family: var(--mono); font-size: 0.72rem; width: 52px; }
 
   .toggle { display: flex; gap: 0.4rem; margin-bottom: 0.75rem; }
@@ -115,8 +125,9 @@
   .tsep { height: 1px; background: var(--line); margin: 0; }
 
   .flag { font-size: 0.58rem; font-family: var(--mono); padding: 0.05rem 0.28rem; border-radius: 3px; margin-left: 0.35rem; vertical-align: middle; }
-  .flag.hi { background: rgba(229,100,94,0.15); color: var(--bad); }
-  .flag.lo { background: rgba(232,169,58,0.15); color: var(--warn); }
+  .flag.hi { background: rgba(163,38,27,0.12); color: var(--bad); }
+  .flag.lo { background: rgba(138,90,0,0.12); color: var(--warn); }
+  .cnote { font-family: var(--mono); font-size: 0.6rem; color: var(--faint); }
 
   .note { color: var(--faint); font-size: 0.72rem; margin-top: 1.5rem; line-height: 1.6; }
 
@@ -131,7 +142,7 @@
     padding: 0.3rem 0.7rem; border-radius: 5px; cursor: pointer; transition: all 0.15s;
   }
   .copybtn:hover { border-color: var(--accent); color: var(--accent); }
-  .copybtn.done { border-color: var(--accent); color: var(--accent); background: rgba(77,208,192,0.1); }
+  .copybtn.done { border-color: var(--accent); color: var(--accent); background: rgba(163,38,27,0.1); }
 
   .mapcalc { margin-top: 1.75rem; }
   .mcrow { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; }
@@ -141,7 +152,7 @@
     text-align: right; -moz-appearance: textfield;
   }
   .mcrow input::-webkit-outer-spin-button, .mcrow input::-webkit-inner-spin-button { -webkit-appearance: none; }
-  .mcrow input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 2px rgba(77,208,192,0.15); }
+  .mcrow input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 2px rgba(163,38,27,0.14); }
   .mcslash, .mceq { color: var(--faint); font-family: var(--mono); font-size: 1.1rem; }
   .mcout { font-family: var(--mono); font-size: 1.5rem; font-weight: 600; color: var(--accent); min-width: 48px; text-align: right; }
   .mcunit { color: var(--dim); font-family: var(--mono); font-size: 0.72rem; }
@@ -153,10 +164,16 @@
 <body>
 <div class="wrap">
   <header>
-    <h1>Right Heart Cath <span class="tag">// hemodynamics</span></h1>
-    <p>Enter measured values. Derived parameters update live. Not a substitute for clinical judgment.</p>
+    <h1 id="pageTitle">Right Heart Cath <span class="tag">// hemodynamics</span></h1>
+    <p id="pageSub">Enter measured values. Derived parameters update live. Not a substitute for clinical judgment.</p>
   </header>
 
+  <div class="tabs">
+    <button class="tabbtn on" data-tab="rhc">Right Heart Catheterization</button>
+    <button class="tabbtn" data-tab="cor">Coronary Physiology</button>
+  </div>
+
+  <div id="tab-rhc">
   <div class="grid">
     <!-- INPUTS -->
     <div class="panel">
@@ -281,7 +298,7 @@
 
   <div class="note">
     <strong style="color:var(--dim)">Formulas.</strong><br>
-    BSA (DuBois) = <code>0.007184 · ht<sup>0.725</sup> · wt<sup>0.425</sup></code>.
+    BSA (Mosteller) = <code>√(ht<sub>cm</sub> · wt<sub>kg</sub> / 3600)</code>.
     Fick CO = <code>VO₂ / (1.34 · Hb · 10 · (SaO₂−SvO₂))</code>.
     CI = CO / BSA · SV = CO·1000/HR.
     SVR = <code>80·(MAP−RAP)/CO</code> dynes, or <code>(MAP−RAP)/CO</code> Wood units. Indexed forms (SVRI, PVRI, TPRI) use CI in place of CO.
@@ -291,12 +308,616 @@
     Cardiac power output = MAP·CO/451.
     PA compliance = SV/(PAs−PAd).
   </div>
+  </div><!-- /tab-rhc -->
+
+  <div id="tab-cor" style="display:none">
+    <iframe id="corFrame" title="Coronary function testing report"
+      style="width:100%;border:1px solid var(--line);border-radius:10px;background:#fff;display:block"></iframe>
+  </div>
+  <!-- Coronary report source, loaded into the iframe to keep its styles/scripts isolated -->
+  <script type="text/html" id="corSrc"><!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Coronary function testing report</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f4eeee; --panel:#ffffff; --ink:#2a1d1d; --muted:#7a6a6a; --line:#e0d2d2;
+  --accent:#a3261b; --accent-soft:#f6e4e2; --on:#a3261b;
+  --abn:#a3261b; --abn-bg:#f6e4e2; --nl:#1d6b3a; --nl-bg:#dff3e6; --bl:#8a5a00; --bl-bg:#fbefd6;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+/* Dark mode intentionally disabled to stay consistent with the fixed-light RHC page. */
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;font-size:16px;line-height:1.5}
+main{max-width:760px;margin:0 auto;padding:2rem 1.25rem 3rem}
+h1{font-size:1.5rem;font-weight:600;margin:0 0 .25rem}
+p.sub{color:var(--muted);margin:0 0 1.5rem}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:1.25rem;margin-bottom:1.25rem}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:500px}
+th,td{border-bottom:1px solid var(--line);padding:.6rem .5rem;text-align:center}
+th{font-weight:600}
+thead th{border-bottom:2px solid var(--ink)}
+th.custom input{font:inherit;font-weight:600;width:5.5rem;max-width:100%;padding:.3rem .4rem;text-align:center;border:1.5px dashed var(--line);border-radius:6px;background:var(--bg);color:var(--ink)}
+th.custom input:focus-visible{outline:3px solid var(--accent);outline-offset:1px;border-style:solid;border-color:var(--accent)}
+th.custom input::placeholder{color:var(--muted);font-weight:400}
+thead th small{display:block;font-weight:400;color:var(--muted);font-size:.8rem}
+tbody th{text-align:left;font-weight:500}
+tbody tr:last-child th,tbody tr:last-child td{border-bottom:none}
+.cell{display:inline-flex;align-items:center;justify-content:center;width:2.4rem;height:2.4rem;
+  border:1.5px solid var(--line);border-radius:6px;cursor:pointer;background:transparent;color:var(--panel);
+  font-size:1.1rem;transition:background .12s,border-color .12s}
+.cell:hover{border-color:var(--accent)}
+.cell:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.cell[aria-pressed="true"]{background:var(--on);border-color:var(--on)}
+.cell svg{width:1.1rem;height:1.1rem;opacity:0}
+.cell[aria-pressed="true"] svg{opacity:1}
+.opts{display:flex;flex-wrap:wrap;gap:1rem 1.5rem;margin-top:1rem;color:var(--muted);font-size:.95rem}
+.opts label{display:flex;align-items:center;gap:.4rem;cursor:pointer}
+.opts input{accent-color:var(--accent);width:1rem;height:1rem}
+textarea{width:100%;min-height:10rem;resize:vertical;border:1px solid var(--line);border-radius:6px;
+  padding:.75rem;background:var(--bg);color:var(--ink);font-family:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;font-size:.9rem;line-height:1.55}
+.actions{display:flex;gap:.6rem;margin-top:.75rem;flex-wrap:wrap}
+button.btn{font:inherit;font-weight:500;padding:.55rem 1rem;border-radius:6px;cursor:pointer;border:1.5px solid var(--accent)}
+button.primary{background:var(--accent);color:var(--panel)}
+button.secondary{background:transparent;color:var(--accent)}
+button.btn:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.inc{display:flex;align-items:center;gap:.4rem;color:var(--muted);font-size:.95rem;cursor:pointer}
+.inc input{accent-color:var(--accent);width:1rem;height:1rem}
+.status{color:var(--muted);font-size:.9rem;align-self:center}
+h2{font-size:1rem;font-weight:600;margin:0 0 .75rem}
+h3{font-size:.8rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:1.1rem 0 .6rem}
+h2 + h3{margin-top:0}
+.flow{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.9rem}
+.flow label{display:flex;flex-direction:column;gap:.3rem;font-weight:500;font-size:.95rem}
+.flow label span{font-weight:400;color:var(--muted);font-size:.8rem}
+.flow input{font:inherit;padding:.5rem .6rem;border:1.5px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);width:100%}
+.flow input:focus-visible{outline:3px solid var(--accent);outline-offset:1px;border-color:var(--accent)}
+.results{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:.9rem;margin-top:1.1rem}
+.res{border:1px solid var(--line);border-radius:8px;padding:.8rem 1rem}
+.rl{color:var(--muted);font-size:.85rem}
+.rv{font-size:1.9rem;font-weight:600;line-height:1.2;font-variant-numeric:tabular-nums}
+.tag{display:inline-block;margin-top:.35rem;font-size:.85rem;font-weight:600;padding:.15rem .55rem;border-radius:4px}
+.tag:empty{display:none}
+.tag.abn{background:var(--abn-bg);color:var(--abn)}
+.tag.nl{background:var(--nl-bg);color:var(--nl)}
+.tag.bl{background:var(--bl-bg);color:var(--bl)}
+.formula{color:var(--muted);font-size:.85rem;margin:.9rem 0 0}
+.tgrid{display:grid;grid-template-columns:minmax(110px,1.4fr) repeat(4,minmax(56px,1fr));gap:.5rem;align-items:center;overflow-x:auto}
+.tgrid .th{color:var(--muted);font-size:.85rem;text-align:center}
+.tgrid .rh{font-weight:500;font-size:.95rem;display:flex;flex-direction:column}
+.tgrid .rh span{font-weight:400;color:var(--muted);font-size:.8rem}
+.tgrid input{font:inherit;padding:.5rem .4rem;border:1.5px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);width:100%;min-width:0;text-align:center}
+.tgrid input:focus-visible{outline:3px solid var(--accent);outline-offset:1px;border-color:var(--accent)}
+.tgrid .avg{text-align:center;font-weight:600;font-variant-numeric:tabular-nums}
+.interp{margin:1rem 0 0;padding:.75rem 1rem;border-left:3px solid var(--accent);background:var(--accent-soft);border-radius:0 6px 6px 0}
+.interp:empty{display:none}
+.refs{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:.75rem}
+.ref{border:1px solid var(--line);border-radius:8px;padding:.6rem .9rem}
+.rn{font-size:1.3rem;font-weight:600;font-variant-numeric:tabular-nums}
+</style>
+</head>
+<body>
+<main>
+  <h1>Coronary function testing report</h1>
+  <p class="sub">Fill in what you measured. Sections you leave empty are left out, and the plain-text report at the bottom updates as you go.</p>
+
+  <section class="panel">
+    <h2>Acetylcholine provocation</h2>
+    <div class="flow" style="margin-bottom:1rem">
+      <label>Coronary vessel <span>interrogated for ACh and microvascular studies</span><input type="text" id="achVessel" autocomplete="off" placeholder="e.g. LAD"></label>
+    </div>
+    <div class="scroll">
+      <table id="grid">
+        <thead>
+          <tr>
+            <th style="text-align:left">Acetylcholine</th>
+            <th>20<small>mcg</small></th>
+            <th>50<small>mcg</small></th>
+            <th>100<small>mcg</small></th>
+            <th class="custom"><input type="number" inputmode="decimal" step="any" min="0" id="customDose" placeholder="Custom" aria-label="Custom acetylcholine dose in mcg"><small>mcg</small></th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <div class="opts">
+      <label><input type="checkbox" id="optNeg" checked> List negative findings</label>
+      <label><input type="checkbox" id="optInterp" checked> Add interpretation</label>
+    </div>
+  </section>
+
+
+  <section class="panel">
+    <h2>Coronary microvascular testing</h2>
+    <h3>Bolus thermodilution</h3>
+    <div class="tgrid" role="group" aria-label="Transit times in seconds">
+      <div></div><div class="th">#1</div><div class="th">#2</div><div class="th">#3</div><div class="th">Average</div>
+      <div class="rh">Resting time <span>sec</span></div>
+      <input type="number" inputmode="decimal" step="any" min="0" id="tr1" aria-label="Resting transit time 1">
+      <input type="number" inputmode="decimal" step="any" min="0" id="tr2" aria-label="Resting transit time 2">
+      <input type="number" inputmode="decimal" step="any" min="0" id="tr3" aria-label="Resting transit time 3">
+      <div class="avg" id="trAvg">–</div>
+      <div class="rh">Hyperemic time <span>sec</span></div>
+      <input type="number" inputmode="decimal" step="any" min="0" id="th1" aria-label="Hyperemic transit time 1">
+      <input type="number" inputmode="decimal" step="any" min="0" id="th2" aria-label="Hyperemic transit time 2">
+      <input type="number" inputmode="decimal" step="any" min="0" id="th3" aria-label="Hyperemic transit time 3">
+      <div class="avg" id="thAvg">–</div>
+    </div>
+    <div class="flow" style="margin-top:1rem">
+      <label>Pd hyperemia <span>mmHg (for IMR)</span><input type="number" inputmode="decimal" step="any" min="0" id="tdPd"></label>
+      <label>CFR <span>auto-calculated, or type a value</span><input type="number" inputmode="decimal" step="any" min="0" id="tdCfr" data-manual="false"></label>
+      <label>IMR <span>auto-calculated, or type a value</span><input type="number" inputmode="decimal" step="any" min="0" id="tdImr" data-manual="false"></label>
+    </div>
+    <div class="results">
+      <div class="res"><div class="rl">CFR (Resting time / Hyperemic time)</div><div class="rv" id="tdCfrVal">–</div><div class="tag" id="tdCfrTag"></div></div>
+      <div class="res"><div class="rl">IMR (Pd × Hyperemic time)</div><div class="rv" id="tdImrVal">–</div><div class="tag" id="tdImrTag"></div></div>
+    </div>
+    <p class="formula">Abnormal CFR &lt; 2.5. Abnormal IMR ≥ 25. Clear the CFR or IMR box to go back to the calculated value.</p>
+    <h3>Continuous thermodilution</h3>
+    <div class="flow">
+      <label>Q rest <span>mL/min</span><input type="number" inputmode="decimal" step="any" min="0" id="qRest"></label>
+      <label>Q hyperemia <span>mL/min</span><input type="number" inputmode="decimal" step="any" min="0" id="qHyp"></label>
+      <label>Pa rest <span>mmHg</span><input type="number" inputmode="decimal" step="any" min="0" id="paRest"></label>
+      <label>Pd hyperemia <span>mmHg</span><input type="number" inputmode="decimal" step="any" min="0" id="pdHyp"></label>
+    </div>
+    <div class="results">
+      <div class="res"><div class="rl">QCFR (Qhyper / Qrest)</div><div class="rv" id="cfrVal">–</div></div>
+      <div class="res"><div class="rl">MRR</div><div class="rv" id="mrrVal">–</div><div class="tag" id="mrrTag"></div></div>
+    </div>
+    <p class="formula">MRR = (Qhyperemia / Qrest) × (Pa rest / Pd hyperemia). Abnormal (positive for CMD) &lt; 2.1; normal &gt; 2.7.</p>
+    <p class="interp" id="mvImp"></p>
+  </section>
+
+  <section class="panel">
+    <h2>Bridge testing</h2>
+    <div class="flow" style="margin-bottom:.2rem">
+      <label>Bridge vessel <span>e.g. mid LAD</span><input type="text" id="mbVessel" autocomplete="off"></label>
+    </div>
+    <h3>Rest</h3>
+    <div class="flow">
+      <label>HR <span>bpm</span><input type="number" inputmode="decimal" step="any" min="0" id="mbRHr" ></label>
+      <label>Systolic BP <span>mmHg</span><input type="number" inputmode="decimal" step="any" min="0" id="mbRSbp" ></label>
+      <label>Diastolic BP <span>mmHg</span><input type="number" inputmode="decimal" step="any" min="0" id="mbRDbp" ></label>
+      <label>MAP <span>auto, or type a value</span><input type="number" inputmode="decimal" step="any" min="0" id="mbRMap" data-manual="false"></label>
+      <label>RFR <span>ratio</span><input type="number" inputmode="decimal" step="any" min="0" id="mbRRfr" ></label>
+    </div>
+    <h3>Stress (dobutamine and atropine)</h3>
+    <div class="flow">
+      <label>Dobutamine dose <span>e.g. 40 mcg/kg/min</span><input type="text" id="mbDob" autocomplete="off"></label>
+      <label>Atropine dose <span>e.g. 1 mg</span><input type="text" id="mbAtr" autocomplete="off"></label>
+      <label>HR <span>bpm</span><input type="number" inputmode="decimal" step="any" min="0" id="mbSHr" ></label>
+      <label>Systolic BP <span>mmHg</span><input type="number" inputmode="decimal" step="any" min="0" id="mbSSbp" ></label>
+      <label>Diastolic BP <span>mmHg</span><input type="number" inputmode="decimal" step="any" min="0" id="mbSDbp" ></label>
+      <label>MAP <span>auto, or type a value</span><input type="number" inputmode="decimal" step="any" min="0" id="mbSMap" data-manual="false"></label>
+      <label>RFR <span>ratio</span><input type="number" inputmode="decimal" step="any" min="0" id="mbSRfr" ></label>
+    </div>
+    <h3>IVUS</h3>
+    <div class="flow">
+      <label>Reference vessel <span>segment</span><input type="text" id="mbRefLoc" autocomplete="off"></label>
+      <label>Area <span>mm²</span><input type="number" inputmode="decimal" step="any" min="0" id="mbRefArea" ></label>
+    </div>
+    <div class="flow" style="margin-top:.9rem">
+      <label>Intramural segment <span>segment</span><input type="text" id="mbImLoc" autocomplete="off"></label>
+      <label>MLA <span>mm²</span><input type="number" inputmode="decimal" step="any" min="0" id="mbImArea" ></label>
+      <label>Bridge length <span>mm</span><input type="number" inputmode="decimal" step="any" min="0" id="mbLen"></label>
+      <label>Bridge thickness <span>mm</span><input type="number" inputmode="decimal" step="any" min="0" id="mbThick"></label>
+    </div>
+    <div class="results">
+      <div class="res"><div class="rl">Compression (reference area to intramural MLA)</div><div class="rv" id="mbCompVal">–</div><div class="tag" id="mbCompTag"></div></div>
+    </div>
+    <p class="interp" id="mbImp"></p>
+    <p class="formula">Compression = (reference area − intramural MLA) / reference area. Significant &gt; 70%. Blank fields show as *** in the report. MAP = (systolic + 2 × diastolic) / 3; clear the MAP box to go back to the calculated value.</p>
+  </section>
+
+  <section class="panel">
+    <h2>Report</h2>
+    <textarea id="out" readonly spellcheck="false" aria-label="Plain-text report"></textarea>
+    <div class="actions">
+      <button class="btn primary" id="copy">Copy report</button>
+      <button class="btn secondary" id="clear">Clear all</button>
+      <label class="inc"><input type="checkbox" id="optRefs" checked> Include reference values</label>
+      <span class="status" id="status" aria-live="polite"></span>
+    </div>
+  </section>
+  <section class="panel" aria-labelledby="refH">
+    <h2 id="refH">Reference values (normal)</h2>
+    <div class="refs">
+      <div class="ref"><div class="rl">RFR</div><div class="rn">&gt; 0.89</div></div>
+      <div class="ref"><div class="rl">FFR</div><div class="rn">&gt; 0.80</div></div>
+      <div class="ref"><div class="rl">CFR</div><div class="rn">≥ 2.5</div></div>
+      <div class="ref"><div class="rl">IMR</div><div class="rn">&lt; 25</div></div>
+    </div>
+  </section>
+</main>
+
+<script>
+const DOSES = [20, 50, 100, "custom"];
+function customVal(){ return document.getElementById("customDose").value.trim(); }
+function doseLabel(d){
+  if (d !== "custom") return `${d} mcg`;
+  const v = customVal();
+  return v ? `${v} mcg` : "custom dose";
+}
+function doseActive(d){
+  if (d !== "custom") return true;
+  return customVal() !== "" || ROWS.some(r => state[r.key]["custom"]);
+}
+const ROWS = [
+  { key:"ekg",  label:"EKG",                         pos:"ischemic EKG changes",                     neg:"no EKG changes" },
+  { key:"sym",  label:"Symptoms",                    pos:"reproduction of symptoms",                 neg:"no symptoms" },
+  { key:"ang",  label:"Angiographic Changes",        pos:"angiographic vasoconstriction",            neg:"no angiographic changes" },
+  { key:"ang90",label:"Angiographic Changes > 90%",  pos:"angiographic vasoconstriction >90%",       neg:null }
+];
+const state = {};
+ROWS.forEach(r => { state[r.key] = {}; DOSES.forEach(d => state[r.key][d] = false); });
+
+const check = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+const tbody = document.querySelector("#grid tbody");
+
+ROWS.forEach(r => {
+  const tr = document.createElement("tr");
+  tr.innerHTML = `<th scope="row">${r.label}</th>`;
+  DOSES.forEach(d => {
+    const td = document.createElement("td");
+    const b = document.createElement("button");
+    b.className = "cell";
+    b.type = "button";
+    b.dataset.row = r.key; b.dataset.dose = d;
+    b.setAttribute("aria-pressed","false");
+    b.setAttribute("aria-label", `${r.label} at ${d === "custom" ? "custom dose" : d + " mcg"}`);
+    b.innerHTML = check;
+    b.addEventListener("click", () => toggle(r.key, d));
+    td.appendChild(b); tr.appendChild(td);
+  });
+  tbody.appendChild(tr);
+});
+
+function setCell(row, dose, val){
+  state[row][dose] = val;
+  const b = document.querySelector(`.cell[data-row="${row}"][data-dose="${dose}"]`);
+  b.setAttribute("aria-pressed", String(val));
+}
+function toggle(row, dose){
+  const val = !state[row][dose];
+  setCell(row, dose, val);
+  // >90% implies angiographic change; unchecking angiographic change clears >90%
+  if (row === "ang90" && val) setCell("ang", dose, true);
+  if (row === "ang" && !val) setCell("ang90", dose, false);
+  render();
+}
+
+function joinList(a){
+  if (a.length <= 1) return a.join("");
+  if (a.length === 2) return a.join(" and ");
+  return a.slice(0,-1).join(", ") + ", and " + a[a.length-1];
+}
+function cap(s){ return s.charAt(0).toUpperCase() + s.slice(1); }
+
+function render(){
+  const showNeg = document.getElementById("optNeg").checked;
+  const interp = document.getElementById("optInterp").checked;
+  const lines = [
+    `The ${st("achVessel")} was interrogated for acetylcholine provocation and microvascular studies.`,
+    "",
+    "Intracoronary acetylcholine provocation testing:"
+  ];
+
+  DOSES.forEach(d => {
+    if (!doseActive(d)) return;
+    const s = {}; ROWS.forEach(r => s[r.key] = state[r.key][d]);
+    const pos = [], neg = [];
+    if (s.ekg) pos.push(ROWS[0].pos); else neg.push(ROWS[0].neg);
+    if (s.sym) pos.push(ROWS[1].pos); else neg.push(ROWS[1].neg);
+    if (s.ang90) pos.push(ROWS[3].pos);
+    else if (s.ang) pos.push(ROWS[2].pos);
+    else neg.push(ROWS[2].neg);
+
+    let text;
+    if (pos.length && showNeg && neg.length) text = cap(joinList(pos)) + "; " + joinList(neg) + ".";
+    else if (pos.length) text = cap(joinList(pos)) + ".";
+    else text = "No EKG changes, no symptoms, and no angiographic changes.";
+    lines.push(`${cap(doseLabel(d))}: ${text}`);
+  });
+
+  if (interp){
+    let epi = null, micro = null;
+    for (const d of DOSES){
+      const e = state.ekg[d], sy = state.sym[d], a90 = state.ang90[d];
+      if (e && sy && a90 && epi === null) epi = d;
+      if (e && sy && !a90 && micro === null) micro = d;
+    }
+    if (epi !== null)
+      lines.push(`Impression: Positive for epicardial coronary vasospasm at ${doseLabel(epi)} (symptoms, ischemic EKG changes, and >90% vasoconstriction).`);
+    else if (micro !== null)
+      lines.push(`Impression: Findings consistent with microvascular spasm at ${doseLabel(micro)} (symptoms and ischemic EKG changes without >90% epicardial vasoconstriction).`);
+    else if (ROWS.some(r => DOSES.some(d => state[r.key][d])))
+      lines.push("Impression: Non-diagnostic acetylcholine provocation test.");
+    else
+      lines.push("Impression: Negative acetylcholine provocation test.");
+  }
+
+  const td = calcThermo();
+  const flow = calcFlow();
+  const mvParts = [];
+  if (td && td.interp) mvParts.push(td.interp);
+  if (flow){
+    const m = flow.mrr.toFixed(2);
+    if (flow.mrr < 2.1) mvParts.push(`MRR of ${m} is abnormal, consistent with coronary microvascular dysfunction.`);
+    else if (flow.mrr > 2.7) mvParts.push(`MRR of ${m} is normal.`);
+    else mvParts.push(`MRR of ${m} is borderline (2.1-2.7).`);
+  }
+  const mvImp = mvParts.join(" ");
+  document.getElementById("mvImp").textContent = mvImp;
+  if (td || flow){
+    lines.push("");
+    lines.push("Coronary Microvascular Testing:");
+    if (td){
+      lines.push("Bolus Thermodilution:");
+      if (td.trAvg !== null) lines.push(`Resting time: ${td.tr.map(fmt).join(", ")} sec (average ${td.trAvg.toFixed(2)} sec).`);
+      if (td.thAvg !== null) lines.push(`Hyperemic time: ${td.th.map(fmt).join(", ")} sec (average ${td.thAvg.toFixed(2)} sec).`);
+      if (td.pd !== null) lines.push(`Pd hyperemia: ${fmt(td.pd)} mmHg.`);
+      if (td.cfr !== null) lines.push(`CFR: ${td.cfr.toFixed(2)} - ${td.cfr < 2.5 ? "abnormal" : "normal"}.`);
+      if (td.imr !== null) lines.push(`IMR: ${fmt(Math.round(td.imr*10)/10)} - ${td.imr >= 25 ? "abnormal" : "normal"}.`);
+    }
+    if (flow){
+      lines.push("Continuous Thermodilution:");
+      lines.push(`Q rest ${fmt(flow.qRest)} mL/min, Q hyperemia ${fmt(flow.qHyp)} mL/min, Pa rest ${fmt(flow.paRest)} mmHg, Pd hyperemia ${fmt(flow.pdHyp)} mmHg.`);
+      lines.push(`QCFR (Qhyper/Qrest): ${flow.cfr.toFixed(2)}.`);
+      lines.push(`MRR: ${flow.mrr.toFixed(2)}`);
+    }
+    if (mvImp) lines.push(`Impression: ${mvImp}`);
+  }
+
+  const mb = calcBridge();
+  if (mb){
+    lines.push("");
+    lines.push(...mb.lines);
+  }
+
+  if (document.getElementById("optRefs").checked){
+    lines.push("");
+    lines.push("Reference values: RFR > 0.89, FFR > 0.80, CFR >= 2.5, IMR < 25.");
+  }
+
+  document.getElementById("out").value = lines.join("\n");
+}
+
+function num(id){
+  const v = parseFloat(document.getElementById(id).value);
+  return isFinite(v) && v > 0 ? v : null;
+}
+function fmt(n){ return Number.isInteger(n) ? String(n) : String(+n.toFixed(2)); }
+
+function vals(ids){ return ids.map(num).filter(v => v !== null); }
+function avg(a){ return a.length ? a.reduce((x,y)=>x+y,0)/a.length : null; }
+
+function calcThermo(){
+  const tr = vals(["tr1","tr2","tr3"]), th = vals(["th1","th2","th3"]);
+  const trAvg = avg(tr), thAvg = avg(th), pd = num("tdPd");
+  document.getElementById("trAvg").textContent = trAvg !== null ? trAvg.toFixed(2) : "–";
+  document.getElementById("thAvg").textContent = thAvg !== null ? thAvg.toFixed(2) : "–";
+
+  const cfrIn = document.getElementById("tdCfr"), imrIn = document.getElementById("tdImr");
+  const cfrCalc = (trAvg && thAvg) ? trAvg / thAvg : null;
+  const imrCalc = (pd && thAvg) ? pd * thAvg : null;
+  if (cfrIn.dataset.manual !== "true") cfrIn.value = cfrCalc !== null ? cfrCalc.toFixed(2) : "";
+  if (imrIn.dataset.manual !== "true") imrIn.value = imrCalc !== null ? (Math.round(imrCalc*10)/10) : "";
+  const cfr = num("tdCfr"), imr = num("tdImr");
+
+  const cv = document.getElementById("tdCfrVal"), ct = document.getElementById("tdCfrTag");
+  const iv = document.getElementById("tdImrVal"), it = document.getElementById("tdImrTag");
+  cv.textContent = cfr !== null ? cfr.toFixed(2) : "–";
+  iv.textContent = imr !== null ? fmt(Math.round(imr*10)/10) : "–";
+  if (cfr !== null){ const a = cfr < 2.5; ct.textContent = a ? "Abnormal" : "Normal"; ct.className = "tag " + (a ? "abn" : "nl"); }
+  else { ct.textContent = ""; ct.className = "tag"; }
+  if (imr !== null){ const a = imr >= 25; it.textContent = a ? "Abnormal" : "Normal"; it.className = "tag " + (a ? "abn" : "nl"); }
+  else { it.textContent = ""; it.className = "tag"; }
+
+  let interp = "";
+  if (cfr !== null && imr !== null){
+    const lowCfr = cfr < 2.5, hiImr = imr >= 25;
+    if (!lowCfr && !hiImr) interp = "Normal CFR and IMR. No evidence of coronary microvascular dysfunction.";
+    else if (lowCfr && hiImr) interp = "Reduced CFR and elevated IMR, consistent with coronary microvascular dysfunction (structural, increased microvascular resistance).";
+    else if (lowCfr && !hiImr) interp = "Reduced CFR with normal IMR, consistent with functional coronary microvascular dysfunction (impaired vasodilator reserve, often with elevated resting flow).";
+    else interp = "Elevated IMR with preserved CFR, consistent with coronary microvascular dysfunction (increased microvascular resistance).";
+  } else if (cfr !== null){
+    interp = cfr < 2.5 ? "Reduced CFR. IMR not available." : "Normal CFR. IMR not available.";
+  } else if (imr !== null){
+    interp = imr >= 25 ? "Elevated IMR, consistent with increased microvascular resistance. CFR not available." : "Normal IMR. CFR not available.";
+  }
+
+  const any = tr.length || th.length || pd !== null || cfr !== null || imr !== null;
+  return any ? { tr, th, trAvg, thAvg, pd, cfr, imr, interp } : null;
+}
+
+["tr1","tr2","tr3","th1","th2","th3","tdPd"].forEach(id => document.getElementById(id).addEventListener("input", render));
+["tdCfr","tdImr"].forEach(id => {
+  const el = document.getElementById(id);
+  el.addEventListener("input", () => { el.dataset.manual = el.value.trim() === "" ? "false" : "true"; render(); });
+});
+
+const MB_IDS = ["mbVessel","mbRHr","mbRSbp","mbRDbp","mbRMap","mbRRfr","mbDob","mbAtr","mbSHr","mbSSbp","mbSDbp","mbSMap","mbSRfr","mbRefLoc","mbRefArea","mbImLoc","mbImArea","mbLen","mbThick"];
+function raw(id){ return document.getElementById(id).value.trim(); }
+function st(id){ const v = raw(id); return v === "" ? "***" : v; }
+
+function autoMap(sbpId, dbpId, mapId){
+  const el = document.getElementById(mapId);
+  if (el.dataset.manual === "true") return;
+  const sbp = num(sbpId), dbp = num(dbpId);
+  el.value = (sbp && dbp) ? Math.round((sbp + 2*dbp)/3) : "";
+}
+
+function calcBridge(){
+  autoMap("mbRSbp","mbRDbp","mbRMap");
+  autoMap("mbSSbp","mbSDbp","mbSMap");
+  const refA = num("mbRefArea"), mla = num("mbImArea");
+  const comp = (refA && mla !== null && mla <= refA) ? (refA - mla) / refA * 100 : null;
+  const cv = document.getElementById("mbCompVal"), ct = document.getElementById("mbCompTag");
+  if (comp !== null){
+    const sig = comp > 70;
+    cv.textContent = comp.toFixed(0) + "%";
+    ct.textContent = sig ? "Significant" : "Not significant";
+    ct.className = "tag " + (sig ? "abn" : "nl");
+  } else { cv.textContent = "–"; ct.textContent = ""; ct.className = "tag"; }
+
+  const any = MB_IDS.some(id => raw(id) !== "");
+  const impEl = document.getElementById("mbImp");
+  if (!any){ impEl.textContent = ""; return null; }
+
+  const vessel = st("mbVessel");
+  const rBp = `${st("mbRSbp")}/${st("mbRDbp")} (${st("mbRMap")})`;
+  const sBp = `${st("mbSSbp")}/${st("mbSDbp")} (${st("mbSMap")})`;
+  const rRfr = num("mbRRfr"), sRfr = num("mbSRfr");
+  const verb = (rRfr !== null && sRfr !== null && sRfr >= rRfr) ? "did not decrease" : "decreased";
+  const compTxt = comp !== null ? `${comp.toFixed(0)}% (${comp > 70 ? "significant, >70%" : "not significant, <=70%"})` : "***";
+  const compPct = comp !== null ? `${comp.toFixed(0)}%` : "***";
+
+  const imp = `There was a ${vessel} bridge which was ${st("mbLen")} mm long with a bridge thickness of ${st("mbThick")} mm. The RFR ${verb} from ${st("mbRRfr")} to ${st("mbSRfr")} at a HR of ${st("mbSHr")}, with a compression ratio of ${compPct} by IVUS.`;
+
+  const lines = [
+    "Bridge Testing:",
+    `The ${vessel} Bridge was interrogated by administering dobutamine and atropine until a target heart rate (85% MPHR) was achieved.`,
+    "",
+    `Rest: HR ${st("mbRHr")}, BP ${rBp}, RFR ${st("mbRRfr")}`,
+    `Stress (Dobutamine ${st("mbDob")}, Atropine ${st("mbAtr")}): HR ${st("mbSHr")}, BP ${sBp}, RFR ${st("mbSRfr")}`,
+    "",
+    "IVUS:",
+    `Reference vessel: ${st("mbRefLoc")}, Area ${st("mbRefArea")} mm2`,
+    `Intramural segment: ${st("mbImLoc")}, Area ${st("mbImArea")} mm2, Length ${st("mbLen")} mm, Bridge Thickness ${st("mbThick")} mm`,
+    `Compression ratio: ${compTxt}`,
+    "Impression:",
+    `- ${imp}`
+  ];
+  impEl.textContent = imp;
+  return { lines };
+}
+
+MB_IDS.forEach(id => {
+  const el = document.getElementById(id);
+  if (id === "mbRMap" || id === "mbSMap"){
+    el.addEventListener("input", () => { el.dataset.manual = el.value.trim() === "" ? "false" : "true"; render(); });
+  } else el.addEventListener("input", render);
+});
+
+function calcFlow(){
+  const qRest = num("qRest"), qHyp = num("qHyp"), paRest = num("paRest"), pdHyp = num("pdHyp");
+  const cfrEl = document.getElementById("cfrVal"), mrrEl = document.getElementById("mrrVal"), tag = document.getElementById("mrrTag");
+  const cfr = (qRest && qHyp) ? qHyp / qRest : null;
+  cfrEl.textContent = cfr ? cfr.toFixed(2) : "–";
+  if (!(cfr && paRest && pdHyp)){
+    mrrEl.textContent = "–"; tag.textContent = ""; tag.className = "tag";
+    return null;
+  }
+  const mrr = cfr * (paRest / pdHyp);
+  let label, cls;
+  if (mrr < 2.1){ label = "Abnormal, positive for CMD"; cls = "abn"; }
+  else if (mrr > 2.7){ label = "Normal"; cls = "nl"; }
+  else { label = "Borderline (2.1-2.7)"; cls = "bl"; }
+  mrrEl.textContent = mrr.toFixed(2);
+  tag.textContent = label; tag.className = "tag " + cls;
+  return { qRest, qHyp, paRest, pdHyp, cfr, mrr, label };
+}
+
+["qRest","qHyp","paRest","pdHyp"].forEach(id => document.getElementById(id).addEventListener("input", render));
+
+document.getElementById("optNeg").addEventListener("change", render);
+document.getElementById("optInterp").addEventListener("change", render);
+document.getElementById("optRefs").addEventListener("change", render);
+document.getElementById("customDose").addEventListener("input", render);
+document.getElementById("achVessel").addEventListener("input", render);
+
+document.getElementById("clear").addEventListener("click", () => {
+  ROWS.forEach(r => DOSES.forEach(d => setCell(r.key, d, false)));
+  document.getElementById("customDose").value = "";
+  ["qRest","qHyp","paRest","pdHyp","tr1","tr2","tr3","th1","th2","th3","tdPd","tdCfr","tdImr"].forEach(id => document.getElementById(id).value = "");
+  ["tdCfr","tdImr"].forEach(id => document.getElementById(id).dataset.manual = "false");
+  MB_IDS.forEach(id => document.getElementById(id).value = "");
+  document.getElementById("achVessel").value = "";
+  ["mbRMap","mbSMap"].forEach(id => document.getElementById(id).dataset.manual = "false");
+  render(); flash("Cleared");
+});
+
+document.getElementById("copy").addEventListener("click", async () => {
+  const ta = document.getElementById("out");
+  try { await navigator.clipboard.writeText(ta.value); flash("Copied"); }
+  catch(e){ ta.select(); try { document.execCommand("copy"); flash("Copied"); } catch(_) { flash("Select the text and copy it manually"); } }
+});
+
+let t;
+function flash(msg){
+  const s = document.getElementById("status");
+  s.textContent = msg; clearTimeout(t); t = setTimeout(() => s.textContent = "", 2000);
+}
+
+render();
+<\/script>
+</body>
+</html>
+</script>
 
   <footer>Static client-side tool · no data leaves your browser · host on GitHub Pages as <code>index.html</code></footer>
 </div>
 
 <script>
 const $ = id => document.getElementById(id);
+
+// Tab switching
+const TAB_TITLES = {
+  rhc: ['Right Heart Cath <span class="tag">// hemodynamics</span>', 'Enter measured values. Derived parameters update live. Not a substitute for clinical judgment.'],
+  cor: ['Coronary Function Testing <span class="tag">// ACh · CFR · IMR · MRR · bridge</span>', 'ACh provocation, microvascular testing, and bridge testing with a plain-text report. Not a substitute for clinical judgment.']
+};
+
+// Load the coronary report into its isolated iframe (once), then keep it sized to its content.
+let corLoaded = false;
+function loadCoronary() {
+  if (corLoaded) return;
+  corLoaded = true;
+  const frame = $('corFrame');
+  // Script close-tags in the stored source are backslash-escaped so they do not end
+  // the wrapper element; rebuild the real tag here before handing it to the iframe.
+  const closeTag = '<' + '/scr' + 'ipt>';
+  const src = $('corSrc').textContent.split('<\\/scr' + 'ipt>').join(closeTag);
+  frame.srcdoc = src;
+  // Auto-resize to the iframe's content height.
+  const resize = () => {
+    try {
+      const d = frame.contentDocument;
+      if (d && d.body) frame.style.height = (d.body.scrollHeight + 24) + 'px';
+    } catch (e) {}
+  };
+  frame.addEventListener('load', () => {
+    resize();
+    // Re-measure as the user types/expands content inside the frame.
+    try {
+      const d = frame.contentDocument;
+      d.addEventListener('input', () => setTimeout(resize, 0), true);
+      d.addEventListener('click', () => setTimeout(resize, 0), true);
+      new ResizeObserver(resize).observe(d.body);
+    } catch (e) {}
+    setInterval(resize, 800); // safety net for dynamic content
+  });
+}
+
+document.querySelectorAll('.tabbtn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const tab = btn.dataset.tab;
+    document.querySelectorAll('.tabbtn').forEach(b => b.classList.toggle('on', b === btn));
+    $('tab-rhc').style.display = tab === 'rhc' ? '' : 'none';
+    $('tab-cor').style.display = tab === 'cor' ? '' : 'none';
+    $('pageTitle').innerHTML = TAB_TITLES[tab][0];
+    $('pageSub').textContent = TAB_TITLES[tab][1];
+    if (tab === 'cor') loadCoronary();
+  });
+});
+
 let ageOver70 = false;
 
 $('ageToggle').addEventListener('click', e => {
@@ -326,7 +947,7 @@ function flag(key, v) {
 
 function bsa(ht, wt) {
   if (!ht || !wt) return null;
-  return 0.007184 * Math.pow(ht, 0.725) * Math.pow(wt, 0.425);
+  return Math.sqrt((ht * wt) / 3600); // Mosteller
 }
 
 function calc() {
